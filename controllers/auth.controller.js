@@ -4,7 +4,7 @@ import Admin from '../models/admin.model.js';
 import Client from '../models/client.model.js';
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../services/jwt.service.js';
 import { generateResetToken, findByResetToken } from '../services/auth.service.js';
-import { sendPasswordResetEmail } from '../services/mail.service.js';
+import { sendPasswordResetEmail, sendOtpEmail } from '../services/mail.service.js';
 
 // @desc    Register a new client user
 // @route   POST /api/v1/auth/register
@@ -13,25 +13,89 @@ export const register = async (req, res, next) => {
   try {
     const { name, email, password, company } = req.body;
 
-    const userExists = await User.findOne({ email });
-    if (userExists) {
+    let user = await User.findOne({ email });
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpire = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    if (user) {
+      if (!user.isVerified) {
+        // Update user information and resend OTP
+        user.name = name;
+        user.password = password;
+        user.company = company;
+        user.otpCode = otpCode;
+        user.otpExpire = otpExpire;
+        await user.save();
+
+        await sendOtpEmail(user.email, otpCode);
+
+        return res.status(200).json({
+          success: true,
+          message: 'Registration pending verification. A new verification code has been sent to your email.',
+          email: user.email,
+        });
+      }
       return res.status(400).json({ success: false, message: 'Email already registered' });
     }
 
-    const user = await User.create({
+    user = await User.create({
       name,
       email,
       password,
       company,
+      isVerified: false,
+      otpCode,
+      otpExpire,
     });
 
-    // Create corresponding Client profile so projects/invoices/tickets bindings work automatically!
-    await Client.create({
-      name: user.name,
+    await sendOtpEmail(user.email, otpCode);
+
+    res.status(201).json({
+      success: true,
+      message: 'Registration successful! Please verify your email using the OTP sent to you.',
       email: user.email,
-      company: user.company || 'Nextora Partner',
-      userId: user._id,
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Verify OTP for registration activation
+// @route   POST /api/v1/auth/verify-otp
+// @access  Public
+export const verifyOtp = async (req, res, next) => {
+  try {
+    const { email, otpCode } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    if (user.isVerified) {
+      return res.status(400).json({ success: false, message: 'Email already verified' });
+    }
+
+    if (user.otpCode !== otpCode || user.otpExpire < new Date()) {
+      return res.status(400).json({ success: false, message: 'Invalid or expired verification code' });
+    }
+
+    // Mark as verified and clear OTP
+    user.isVerified = true;
+    user.otpCode = undefined;
+    user.otpExpire = undefined;
+    await user.save();
+
+    // Create corresponding Client profile so projects/invoices/tickets bindings work automatically!
+    let client = await Client.findOne({ email: user.email });
+    if (!client) {
+      await Client.create({
+        name: user.name,
+        email: user.email,
+        company: user.company || 'Nextora Partner',
+        userId: user._id,
+      });
+    }
 
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
@@ -44,7 +108,7 @@ export const register = async (req, res, next) => {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
-    res.status(201).json({
+    res.status(200).json({
       success: true,
       accessToken,
       user: {
@@ -83,6 +147,22 @@ export const login = async (req, res, next) => {
 
     if (user.isActive === false) {
       return res.status(401).json({ success: false, message: 'Your account is deactivated' });
+    }
+
+    if (!isStaff && !user.isVerified) {
+      // Send a new OTP so they can verify if their code expired
+      const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+      user.otpCode = otpCode;
+      user.otpExpire = new Date(Date.now() + 10 * 60 * 1000);
+      await user.save();
+      await sendOtpEmail(user.email, otpCode);
+
+      return res.status(403).json({
+        success: false,
+        isVerified: false,
+        message: 'Your account is pending email verification. A new verification code has been sent to your email.',
+        email: user.email,
+      });
     }
 
     const accessToken = generateAccessToken(user);
@@ -155,7 +235,7 @@ export const refreshToken = async (req, res, next) => {
   }
 };
 
-// @desc    Request forgot password reset link
+// @desc    Request forgot password reset OTP
 // @route   POST /api/v1/auth/forgot-password
 // @access  Public
 export const forgotPassword = async (req, res, next) => {
@@ -174,34 +254,48 @@ export const forgotPassword = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Email address not found' });
     }
 
-    const resetToken = await generateResetToken(user);
-    const resetUrl = `${req.protocol}://${req.get('host')}/api/v1/auth/reset-password/${modelType}/${resetToken}`;
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    user.otpCode = otpCode;
+    user.otpExpire = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+    await user.save();
 
-    await sendPasswordResetEmail(user.email, resetUrl);
+    await sendOtpEmail(user.email, otpCode);
 
-    res.status(200).json({ success: true, message: 'Password reset link sent to email' });
+    res.status(200).json({ success: true, message: 'A verification security code has been sent to your email' });
   } catch (error) {
     next(error);
   }
 };
 
-// @desc    Reset password using link token
-// @route   PUT /api/v1/auth/reset-password/:modelType/:token
+// @desc    Reset password using email verification code (OTP)
+// @route   POST /api/v1/auth/reset-password-otp
 // @access  Public
-export const resetPassword = async (req, res, next) => {
+export const resetPasswordOtp = async (req, res, next) => {
   try {
-    const { modelType, token } = req.params;
-    const { password } = req.body;
+    const { email, otpCode, password } = req.body;
 
-    const user = await findByResetToken(token, modelType);
+    let user = await Admin.findOne({ email }).select('+password');
     if (!user) {
-      return res.status(400).json({ success: false, message: 'Invalid or expired security token' });
+      user = await User.findOne({ email }).select('+password');
     }
 
-    // Update password
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    if (user.otpCode !== otpCode || user.otpExpire < new Date()) {
+      return res.status(400).json({ success: false, message: 'Invalid or expired verification code' });
+    }
+
+    // Update password and clear OTP fields
     user.password = password;
+    user.otpCode = undefined;
+    user.otpExpire = undefined;
+    
+    // Also clear any legacy link-based reset token fields just in case
     user.resetPasswordToken = undefined;
     user.resetPasswordExpire = undefined;
+    
     await user.save();
 
     res.status(200).json({ success: true, message: 'Password reset successfully' });
