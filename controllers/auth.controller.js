@@ -25,6 +25,14 @@ export const register = async (req, res, next) => {
       company,
     });
 
+    // Create corresponding Client profile so projects/invoices/tickets bindings work automatically!
+    await Client.create({
+      name: user.name,
+      email: user.email,
+      company: user.company || 'Nextora Partner',
+      userId: user._id,
+    });
+
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
 
