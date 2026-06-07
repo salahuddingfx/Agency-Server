@@ -50,24 +50,29 @@ export const printBanner = async () => {
   await sleep(50);
 
   // Typewriter effect function
-  const typeLine = async (label, text, color = colors.white) => {
+  const typeLine = async (label, content, defaultColor = colors.white) => {
     // We construct the prefix and the typed content separately so the typing effect occurs smoothly on the value
     const prefix = `  ${colors.bright}[${label}]${colors.reset} `;
     process.stdout.write(prefix);
     
-    const coloredText = `${color}${text}${colors.reset}`;
-    // Since we have ANSI escape characters in the text, we don't want to type them character-by-character
-    // because that prints raw escape sequences onto the screen. Instead, we type the plain text and apply color,
-    // or type character-by-character by writing the color sequence, the char, then reset.
-    for (let i = 0; i < text.length; i++) {
-      process.stdout.write(`${color}${text[i]}${colors.reset}`);
-      await sleep(12);
+    const segments = Array.isArray(content) ? content : [{ text: content, color: defaultColor }];
+    
+    for (const segment of segments) {
+      const color = segment.color || defaultColor;
+      const text = segment.text || "";
+      for (let i = 0; i < text.length; i++) {
+        process.stdout.write(`${color}${text[i]}${colors.reset}`);
+        await sleep(12);
+      }
     }
     process.stdout.write('\n');
   };
 
   await typeLine("System", "Initializing Nextora Studio API Server...", colors.cyan);
-  await typeLine("Developer", "Crafted with ❤️ by Salahuddin", colors.green);
+  await typeLine("Developer", [
+    { text: "Crafted with ❤️ by ", color: colors.green },
+    { text: "Salah Uddin Kader", color: `${colors.yellow}${colors.bright}` }
+  ]);
   await typeLine("Environment", `${process.env.NODE_ENV || 'development'} mode`, colors.yellow);
   await typeLine("Port", `Listening on http://localhost:${process.env.PORT || 5000}`, colors.magenta);
   console.log(`${colors.dim}====================================================================${colors.reset}`);
