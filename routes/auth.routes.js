@@ -7,6 +7,7 @@ import {
   forgotPassword,
   verifyOtp,
   resetPasswordOtp,
+  resendOtp,
   changePassword,
 } from '../controllers/auth.controller.js';
 import { protect } from '../middlewares/auth.middleware.js';
@@ -25,6 +26,7 @@ const router = express.Router();
 
 router.post('/register', authLimiter, validateRequest(registerSchema), register);
 router.post('/verify-otp', authLimiter, validateRequest(verifyOtpSchema), verifyOtp);
+router.post('/resend-otp', authLimiter, validateRequest(forgotPasswordSchema), resendOtp);
 router.post('/login', authLimiter, validateRequest(loginSchema), login);
 router.post('/logout', logout);
 router.post('/refresh-token', refreshToken);
