@@ -169,7 +169,7 @@ export const generateInvoicePdf = async (invoice, client) => {
          .text('3. For support or queries, contact us at info.salahuddinkader@gmail.com.', 50, notesTop + 42, { width: 450 });
 
       // --- FOOTER TAGLINE (Fixed at bottom of page) ---
-      const footerY = doc.page.height - 70;
+      const footerY = doc.page.height - 85;
       doc.strokeColor('#cbd5e1')
          .lineWidth(1)
          .moveTo(50, footerY)
