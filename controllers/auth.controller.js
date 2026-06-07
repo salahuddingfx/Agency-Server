@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import User from '../models/user.model.js';
 import Admin from '../models/admin.model.js';
+import Client from '../models/client.model.js';
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../services/jwt.service.js';
 import { generateResetToken, findByResetToken } from '../services/auth.service.js';
 import { sendPasswordResetEmail } from '../services/mail.service.js';
