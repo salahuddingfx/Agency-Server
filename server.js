@@ -18,13 +18,13 @@ const seedAdmin = async () => {
     const adminCount = await Admin.countDocuments();
     if (adminCount === 0) {
       await Admin.create({
-        name: 'System Super Admin',
-        email: 'superadmin@nextora.tech',
-        password: 'Admin@Nextora2026',
+        name: 'Salah Uddin Kader',
+        email: 'info.salahuddinkader@gmail.com',
+        password: 'Salah5537@@',
         role: 'Super Admin',
         isActive: true,
       });
-      console.log(`\x1b[1m[Seed]\x1b[0m \x1b[32mDefault Super Admin seeded successfully (superadmin@nextora.tech)\x1b[0m`);
+      console.log(`\x1b[1m[Seed]\x1b[0m \x1b[32mDefault Super Admin seeded successfully (info.salahuddinkader@gmail.com)\x1b[0m`);
     }
   } catch (error) {
     console.error(`\x1b[1m[Seed]\x1b[0m \x1b[31mAdmin user seeding failed: ${error.message}\x1b[0m`);
