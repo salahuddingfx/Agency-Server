@@ -42,7 +42,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"superadmin@nextora.tech\",\n  \"password\": \"Admin@Nextora2026\"\n}"
+              "raw": "{\n  \"email\": \"info.salahuddinkader@gmail.com\",\n  \"password\": \"Salah5537@@\"\n}"
             },
             "url": {
               "raw": "{{BASE_URL}}/auth/login",
