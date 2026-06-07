@@ -21,6 +21,9 @@ export const sendMail = async ({ to, subject, html }) => {
 export const sendPasswordResetEmail = async (email, resetUrl) => {
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #1f2937; border-radius: 8px; background-color: #0f172a; color: #f8fafc;">
+      <div style="text-align: center; margin-bottom: 25px;">
+        <img src="${process.env.CLIENT_URL || 'http://localhost:5173'}/favicon.svg" alt="Nextora Studio Logo" style="width: 55px; height: 55px; display: inline-block; border: none; outline: none;" />
+      </div>
       <h2 style="color: #18b7f5; text-align: center;">Nextora Studio Password Reset</h2>
       <p>Hello,</p>
       <p>You requested a password reset for your Nextora workspace dashboard account. Click the button below to secure your credentials:</p>
@@ -38,6 +41,9 @@ export const sendPasswordResetEmail = async (email, resetUrl) => {
 export const sendOtpEmail = async (email, otp) => {
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #1f2937; border-radius: 8px; background-color: #0f172a; color: #f8fafc;">
+      <div style="text-align: center; margin-bottom: 25px;">
+        <img src="${process.env.CLIENT_URL || 'http://localhost:5173'}/favicon.svg" alt="Nextora Studio Logo" style="width: 55px; height: 55px; display: inline-block; border: none; outline: none;" />
+      </div>
       <h2 style="color: #18b7f5; text-align: center;">Nextora Studio Verification Code</h2>
       <p>Hello,</p>
       <p>Your one-time authorization and verification security code is:</p>
@@ -55,6 +61,9 @@ export const sendOtpEmail = async (email, otp) => {
 export const sendInvoiceEmail = async (email, invoice) => {
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #1f2937; border-radius: 8px; background-color: #0f172a; color: #f8fafc;">
+      <div style="text-align: center; margin-bottom: 25px;">
+        <img src="${process.env.CLIENT_URL || 'http://localhost:5173'}/favicon.svg" alt="Nextora Studio Logo" style="width: 55px; height: 55px; display: inline-block; border: none; outline: none;" />
+      </div>
       <h2 style="color: #18b7f5; text-align: center;">Invoice Released: ${invoice.invoiceId}</h2>
       <p>Dear Partner,</p>
       <p>A new invoice has been compiled and released for project sprint: <strong>${invoice.project}</strong>.</p>
