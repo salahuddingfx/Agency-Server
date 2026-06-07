@@ -326,3 +326,27 @@ export const changePassword = async (req, res, next) => {
     next(error);
   }
 };
+
+// @desc    Resend registration activation OTP
+// @route   POST /api/v1/auth/resend-otp
+// @access  Public
+export const resendOtp = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    if (user.isVerified) {
+      return res.status(400).json({ success: false, message: 'Email already verified' });
+    }
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    user.otpCode = otpCode;
+    user.otpExpire = new Date(Date.now() + 10 * 60 * 1000);
+    await user.save();
+    await sendOtpEmail(user.email, otpCode);
+    res.status(200).json({ success: true, message: 'A new verification code has been sent to your email.' });
+  } catch (error) {
+    next(error);
+  }
+};
