@@ -168,17 +168,18 @@ export const generateInvoicePdf = async (invoice, client) => {
          .text('2. Payments can be settled via bank transfer or direct online link.', 50, notesTop + 30, { width: 450 })
          .text('3. For support or queries, contact us at info.salahuddinkader@gmail.com.', 50, notesTop + 42, { width: 450 });
 
-      // --- FOOTER TAGLINE ---
+      // --- FOOTER TAGLINE (Fixed at bottom of page) ---
+      const footerY = doc.page.height - 70;
       doc.strokeColor('#cbd5e1')
          .lineWidth(1)
-         .moveTo(50, notesTop + 80)
-         .lineTo(550, notesTop + 80)
+         .moveTo(50, footerY)
+         .lineTo(550, footerY)
          .stroke();
 
       doc.fillColor('#64748b')
          .font('Helvetica-Oblique')
          .fontSize(9)
-         .text('Nextora Studio  |  Where Ideas Take Shape', 50, notesTop + 95, { align: 'center', width: 500 });
+         .text('Nextora Studio  |  Where Ideas Take Shape', 50, footerY + 15, { align: 'center', width: 500 });
 
       doc.end();
 
