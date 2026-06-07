@@ -24,3 +24,14 @@ export const forgotPasswordSchema = Joi.object({
 export const resetPasswordSchema = Joi.object({
   password: Joi.string().required().min(6),
 });
+
+export const verifyOtpSchema = Joi.object({
+  email: Joi.string().email().required(),
+  otpCode: Joi.string().length(6).required(),
+});
+
+export const resetPasswordOtpSchema = Joi.object({
+  email: Joi.string().email().required(),
+  otpCode: Joi.string().length(6).required(),
+  password: Joi.string().required().min(6),
+});
