@@ -12,3 +12,32 @@ export const getMe = async (req, res, next) => {
     data: req.user,
   });
 };
+
+export const updateMe = async (req, res, next) => {
+  try {
+    const { name, company } = req.body;
+    const updates = {};
+    if (name) updates.name = name;
+    if (company) updates.company = company;
+
+    if (req.file) {
+      updates.avatar = `/uploads/${req.file.filename}`;
+    }
+
+    const user = await User.findByIdAndUpdate(req.user._id, updates, {
+      new: true,
+      runValidators: true,
+    });
+
+    res.status(200).json({
+      success: true,
+      data: user,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message || 'Failed to update profile details',
+    });
+  }
+};
+
