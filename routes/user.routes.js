@@ -6,16 +6,19 @@ import {
   updateUser,
   deleteUser,
   getMe,
+  updateMe,
 } from '../controllers/user.controller.js';
 import { protect } from '../middlewares/auth.middleware.js';
 import { authorize } from '../middlewares/role.middleware.js';
 import { isAdminStaff } from '../middlewares/admin.middleware.js';
+import upload from '../middlewares/upload.middleware.js';
 
 const router = express.Router();
 
 router.use(protect);
 
 router.get('/me', getMe);
+router.put('/me', upload.single('avatar'), updateMe);
 
 // Gated routes for Admin Staff only
 router.use(isAdminStaff);
