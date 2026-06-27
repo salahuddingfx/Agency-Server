@@ -84,3 +84,47 @@ export const sendInvoiceEmail = async (email, invoice) => {
   `;
   return await sendMail({ to: email, subject: `Nextora Studio invoice released - ${invoice.invoiceId}`, html });
 };
+
+export const sendContactEmail = async (contact) => {
+  const adminHtml = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #1f2937; border-radius: 8px; background-color: #0f172a; color: #f8fafc;">
+      <h2 style="color: #18b7f5; text-align: center; margin-bottom: 20px;">New Contact Message Received</h2>
+      <p><strong>Name:</strong> ${contact.name}</p>
+      <p><strong>Email:</strong> ${contact.email}</p>
+      <p><strong>Subject:</strong> ${contact.subject}</p>
+      <p><strong>Message:</strong></p>
+      <div style="background-color: #1e293b; padding: 15px; border-radius: 6px; border: 1px solid #334155; margin-top: 10px; white-space: pre-wrap; color: #cbd5e1;">
+        ${contact.text}
+      </div>
+      <hr style="border: 0; border-top: 1px solid #334155; margin: 25px 0;" />
+      <p style="font-size: 11px; color: #64748b; text-align: center;">Nextora Studio Gateway Portal</p>
+    </div>
+  `;
+
+  const clientHtml = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #1f2937; border-radius: 8px; background-color: #0f172a; color: #f8fafc;">
+      <div style="text-align: center; margin-bottom: 25px;">
+        <img src="${process.env.CLIENT_URL || 'http://localhost:5173'}/favicon.svg" alt="Nextora Studio Logo" style="width: 55px; height: 55px; display: inline-block;" />
+      </div>
+      <h2 style="color: #18b7f5; text-align: center;">Thank You for Contacting Us</h2>
+      <p>Dear ${contact.name},</p>
+      <p>We have successfully received your inquiry regarding <strong>"${contact.subject}"</strong>. Our team will review your request and get back to you within 24 business hours.</p>
+      <p>A copy of your message is attached below for your reference:</p>
+      <div style="background-color: #1e293b; padding: 15px; border-radius: 6px; border: 1px solid #334155; margin: 15px 0; white-space: pre-wrap; color: #cbd5e1;">
+        ${contact.text}
+      </div>
+      <p>Best regards,<br/>Nextora Studio Team</p>
+      <hr style="border: 0; border-top: 1px solid #334155; margin: 20px 0;" />
+      <p style="font-size: 11px; color: #64748b; text-align: center;">Nextora Studio &bull; Where Ideas Take Shape</p>
+    </div>
+  `;
+
+  const adminEmail = process.env.CONTACT_ADMIN_EMAIL || 'nextorastudio@gmail.com';
+  
+  await Promise.all([
+    sendMail({ to: adminEmail, subject: `[Nextora Contact] ${contact.subject}`, html: adminHtml }),
+    sendMail({ to: contact.email, subject: `We've received your request - Nextora Studio`, html: clientHtml })
+  ]).catch((err) => {
+    console.error('Failed to dispatch contact notification emails:', err.message);
+  });
+};
