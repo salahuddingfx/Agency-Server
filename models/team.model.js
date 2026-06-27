@@ -22,7 +22,23 @@ const teamSchema = new mongoose.Schema(
       required: [true, 'Please provide skills formatted as text (e.g., React:98,Cloud:92)'],
       trim: true,
     },
+    bio: {
+      type: String,
+      default: '',
+    },
     avatarUrl: {
+      type: String,
+      default: '',
+    },
+    github: {
+      type: String,
+      default: '',
+    },
+    linkedin: {
+      type: String,
+      default: '',
+    },
+    twitter: {
       type: String,
       default: '',
     },
