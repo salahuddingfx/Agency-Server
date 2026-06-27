@@ -1,4 +1,5 @@
 import User from '../models/user.model.js';
+import Admin from '../models/admin.model.js';
 import * as factory from '../helpers/factory.helper.js';
 
 export const getUsers = factory.getAll(User);
@@ -17,21 +18,32 @@ export const updateMe = async (req, res, next) => {
   try {
     const { name, company } = req.body;
     const updates = {};
-    if (name) updates.name = name;
-    if (company) updates.company = company;
+    if (name !== undefined) updates.name = name;
+    if (company !== undefined) updates.company = company;
 
     if (req.file) {
       updates.avatar = `/uploads/${req.file.filename}`;
     }
 
-    const user = await User.findByIdAndUpdate(req.user._id, updates, {
-      new: true,
-      runValidators: true,
-    });
+    let updatedUser;
+    // Check if the current authenticated user belongs to the Admin collection
+    const isAdmin = req.user.role && ['Super Admin', 'Admin', 'Manager', 'Editor'].includes(req.user.role);
+
+    if (isAdmin) {
+      updatedUser = await Admin.findByIdAndUpdate(req.user._id, updates, {
+        new: true,
+        runValidators: true,
+      });
+    } else {
+      updatedUser = await User.findByIdAndUpdate(req.user._id, updates, {
+        new: true,
+        runValidators: true,
+      });
+    }
 
     res.status(200).json({
       success: true,
-      data: user,
+      data: updatedUser,
     });
   } catch (err) {
     res.status(500).json({
