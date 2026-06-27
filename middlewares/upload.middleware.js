@@ -1,15 +1,13 @@
 import multer from 'multer';
 import { v2 as cloudinary } from 'cloudinary';
 import streamifier from 'streamifier';
-import dotenv from 'dotenv';
+import env from '../config/env.config.js';
 
-dotenv.config();
-
-// Configure Cloudinary using env credentials
+// Configure Cloudinary using centralized env config
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
+  cloud_name: env.CLOUDINARY_CLOUD_NAME,
+  api_key: env.CLOUDINARY_API_KEY,
+  api_secret: env.CLOUDINARY_API_SECRET,
 });
 
 // Store files in memory (buffer) so we can stream them to Cloudinary
