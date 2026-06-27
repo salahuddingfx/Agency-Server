@@ -30,6 +30,7 @@ import projectRoutes from './routes/project.routes.js';
 import invoiceRoutes from './routes/invoice.routes.js';
 import ticketRoutes from './routes/ticket.routes.js';
 import settingsRoutes from './routes/settings.routes.js';
+import uploadRoutes from './routes/upload.routes.js';
 
 const app = express();
 
@@ -114,6 +115,7 @@ app.use(`${routerPrefix}/projects`, apiLimiter, projectRoutes);
 app.use(`${routerPrefix}/invoices`, apiLimiter, invoiceRoutes);
 app.use(`${routerPrefix}/tickets`, apiLimiter, ticketRoutes);
 app.use(`${routerPrefix}/settings`, apiLimiter, settingsRoutes);
+app.use(`${routerPrefix}/upload`, apiLimiter, uploadRoutes);
 
 // Base Route
 app.get('/', (req, res) => {
