@@ -91,8 +91,10 @@ app.use(requestLogger);
 // Static uploads serving
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
-// Swagger API Documentation Routing
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+// Swagger API Documentation — development only, hidden in production
+if (process.env.NODE_ENV !== 'production') {
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+}
 
 // Mount routes onto API endpoints
 const routerPrefix = '/api/v1';
@@ -122,7 +124,18 @@ app.get('/', (req, res) => {
   res.status(200).json({
     success: true,
     message: 'Nextora Studio API Gateway is live.',
-    documentation: '/api-docs',
+    ...(process.env.NODE_ENV !== 'production' && { documentation: '/api-docs' }),
+  });
+});
+
+// Health Check — for uptime monitors (UptimeRobot, Better Uptime, etc.)
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    success: true,
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    uptime: Math.floor(process.uptime()) + 's',
+    environment: process.env.NODE_ENV || 'development',
   });
 });
 
