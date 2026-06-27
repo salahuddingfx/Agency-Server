@@ -30,6 +30,15 @@ const adminSchema = new mongoose.Schema(
       enum: ['Super Admin', 'Admin', 'Manager', 'Editor'],
       default: 'Editor',
     },
+    company: {
+      type: String,
+      default: 'Nextora Studio',
+      trim: true,
+    },
+    avatar: {
+      type: String,
+      default: '',
+    },
     isActive: {
       type: Boolean,
       default: true,
