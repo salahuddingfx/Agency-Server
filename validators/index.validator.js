@@ -45,6 +45,10 @@ export const teamSchema = Joi.object({
   experience: Joi.string().required(),
   skills: Joi.string().required(),
   avatarUrl: Joi.string().allow(''),
+  bio: Joi.string().allow(''),
+  github: Joi.string().allow(''),
+  linkedin: Joi.string().allow(''),
+  twitter: Joi.string().allow(''),
 });
 
 export const techSchema = Joi.object({
