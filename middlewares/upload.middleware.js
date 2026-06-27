@@ -1,29 +1,26 @@
 import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
+import { v2 as cloudinary } from 'cloudinary';
+import streamifier from 'streamifier';
+import dotenv from 'dotenv';
 
-// Create uploads directory if it doesn't exist
-const uploadDir = './uploads';
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
+dotenv.config();
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    cb(null, `${file.fieldname}-${uniqueSuffix}${path.extname(file.originalname)}`);
-  },
+// Configure Cloudinary using env credentials
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const fileFilter = (req, file, cb) => {
-  const filetypes = /jpeg|jpg|png|pdf|doc|docx/;
-  const mimetype = filetypes.test(file.mimetype);
-  const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+// Store files in memory (buffer) so we can stream them to Cloudinary
+const storage = multer.memoryStorage();
 
-  if (mimetype && extname) {
+const fileFilter = (req, file, cb) => {
+  const allowed = /jpeg|jpg|png|gif|webp|pdf|doc|docx/;
+  const mimeOk = allowed.test(file.mimetype);
+  const extOk = allowed.test(file.originalname.split('.').pop().toLowerCase());
+
+  if (mimeOk || extOk) {
     return cb(null, true);
   }
   cb(new Error('Only images, PDFs, or Word documents are allowed'));
@@ -32,8 +29,30 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({
   storage,
   fileFilter,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB limit
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB limit
 });
 
+/**
+ * Uploads a buffer to Cloudinary and resolves with the secure_url.
+ * @param {Buffer} buffer - File buffer from multer memoryStorage
+ * @param {string} folder - Cloudinary folder name
+ * @returns {Promise<string>} - Resolves to the Cloudinary secure URL
+ */
+export function uploadToCloudinary(buffer, folder = 'nextora') {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder,
+        resource_type: 'auto',
+        transformation: [{ quality: 'auto', fetch_format: 'auto' }],
+      },
+      (error, result) => {
+        if (error) return reject(error);
+        resolve(result.secure_url);
+      }
+    );
+    streamifier.createReadStream(buffer).pipe(uploadStream);
+  });
+}
+
 export default upload;
-export { uploadDir };
