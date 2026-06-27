@@ -1,6 +1,7 @@
 import User from '../models/user.model.js';
 import Admin from '../models/admin.model.js';
 import * as factory from '../helpers/factory.helper.js';
+import { uploadToCloudinary } from '../middlewares/upload.middleware.js';
 
 export const getUsers = factory.getAll(User);
 export const getUser = factory.getOne(User);
@@ -22,7 +23,9 @@ export const updateMe = async (req, res, next) => {
     if (company !== undefined) updates.company = company;
 
     if (req.file) {
-      updates.avatar = `/uploads/${req.file.filename}`;
+      // Upload avatar buffer directly to Cloudinary
+      const cloudinaryUrl = await uploadToCloudinary(req.file.buffer, 'nextora/avatars');
+      updates.avatar = cloudinaryUrl;
     }
 
     let updatedUser;
