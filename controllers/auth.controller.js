@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import User from '../models/user.model.js';
 import Admin from '../models/admin.model.js';
 import Client from '../models/client.model.js';
+import env from '../config/env.config.js';
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../services/jwt.service.js';
 import { generateResetToken, findByResetToken } from '../services/auth.service.js';
 import { sendPasswordResetEmail, sendOtpEmail } from '../services/mail.service.js';
@@ -103,7 +104,7 @@ export const verifyOtp = async (req, res, next) => {
     // Set refresh token in HttpOnly cookie
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: env.NODE_ENV === 'production',
       sameSite: 'strict',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
@@ -170,7 +171,7 @@ export const login = async (req, res, next) => {
 
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: env.NODE_ENV === 'production',
       sameSite: 'strict',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });

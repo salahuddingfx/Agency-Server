@@ -1,3 +1,5 @@
+import env from '../config/env.config.js';
+
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const colors = {
@@ -73,8 +75,8 @@ export const printBanner = async () => {
     { text: "Crafted with ❤️ by ", color: colors.green },
     { text: "Salah Uddin Kader", color: `${colors.yellow}${colors.bright}` }
   ]);
-  await typeLine("Environment", `${process.env.NODE_ENV || 'development'} mode`, colors.yellow);
-  await typeLine("Port", `Listening on http://localhost:${process.env.PORT || 5000}`, colors.magenta);
+  await typeLine("Environment", `${env.NODE_ENV} mode`, colors.yellow);
+  await typeLine("Port", `Listening on http://localhost:${env.PORT}`, colors.magenta);
   console.log(`${colors.dim}====================================================================${colors.reset}`);
   console.log("");
 };

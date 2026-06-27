@@ -2,6 +2,7 @@ import express from 'express';
 import helmet from 'helmet';
 import mongoSanitize from 'express-mongo-sanitize';
 import path from 'path';
+import env from './config/env.config.js';
 import corsConfig from './config/cors.config.js';
 import { requestLogger } from './middlewares/logger.middleware.js';
 import { errorHandler } from './middlewares/error.middleware.js';
@@ -92,7 +93,7 @@ app.use(requestLogger);
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // Swagger API Documentation — development only, hidden in production
-if (process.env.NODE_ENV !== 'production') {
+if (env.NODE_ENV !== 'production') {
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 }
 
@@ -124,7 +125,7 @@ app.get('/', (req, res) => {
   res.status(200).json({
     success: true,
     message: 'Nextora Studio API Gateway is live.',
-    ...(process.env.NODE_ENV !== 'production' && { documentation: '/api-docs' }),
+    ...(env.NODE_ENV !== 'production' && { documentation: '/api-docs' }),
   });
 });
 
@@ -135,7 +136,7 @@ app.get('/health', (req, res) => {
     status: 'healthy',
     timestamp: new Date().toISOString(),
     uptime: Math.floor(process.uptime()) + 's',
-    environment: process.env.NODE_ENV || 'development',
+    environment: env.NODE_ENV,
   });
 });
 

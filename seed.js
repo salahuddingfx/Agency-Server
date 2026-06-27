@@ -6,7 +6,7 @@
  */
 
 import mongoose from 'mongoose';
-import dotenv from 'dotenv';
+import env from './config/env.config.js';
 import Service from './models/service.model.js';
 import Portfolio from './models/portfolio.model.js';
 import CaseStudy from './models/caseStudy.model.js';
@@ -16,9 +16,7 @@ import Technology from './models/technology.model.js';
 import Testimonial from './models/testimonial.model.js';
 import Career from './models/career.model.js';
 
-dotenv.config();
-
-const MONGO_URI = process.env.MONGO_URI || process.env.DATABASE_URL;
+const MONGO_URI = env.MONGO_URI;
 
 if (!MONGO_URI) {
   console.error('❌ MONGO_URI not found. Add it to server/.env');
