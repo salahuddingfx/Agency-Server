@@ -13,6 +13,13 @@ const allowedOrigins = [
   'https://admin.nextora.tech',
   'https://nextora.tech',
   'https://api.nextora.tech',
+  'https://nextorastudio.tech',
+  'https://www.nextorastudio.tech',
+  'https://admin.nextorastudio.tech',
+  // Vercel deployment URLs (update these with your real Vercel project names)
+  'https://nextora-studio.vercel.app',
+  'https://nextora-admin.vercel.app',
+  'https://nextora-client.vercel.app',
 ].filter(Boolean);
 
 const corsOptions = {
